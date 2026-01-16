@@ -14,11 +14,14 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { signupSchema } from '@/schemas/auth'
+import { authClient } from '@/lib/auth-client'
+import { toast } from 'sonner'
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
+  const navigate = useNavigate()
   const form = useForm({
     defaultValues: {
       fullName: '',
@@ -28,10 +31,29 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     validators: {
       onSubmit: signupSchema,
     },
-    onSubmit: async ({ value }) => {},
+    onSubmit: async ({ value }) => {
+      await authClient.signUp.email({
+        name: value.fullName,
+        email: value.email,
+        password: value.password,
+        // callbackURL: '/dashboard',
+        fetchOptions:{
+          onSuccess: () => {
+            toast.success('Account created successfully!')
+            navigate({ to: '/' })
+          },
+          onError: ({error}) => {
+            toast.error(error.message)
+          }
+        }
+      })
+    },
   })
 
   return (
+    <div className='flex flex-col gap-6 border border-dashed bg-background text-foreground p-4 sm:p-6'>
+       
+   
     <Card {...props}>
       <CardHeader>
         <CardTitle>Create an account</CardTitle>
@@ -144,5 +166,6 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         </form>
       </CardContent>
     </Card>
+     </div>
   )
 }

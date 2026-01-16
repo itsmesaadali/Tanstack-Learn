@@ -18,24 +18,49 @@ import { Input } from '@/components/ui/input'
 import { Link } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { loginSchema } from '@/schemas/auth'
+import { authClient } from '@/lib/auth-client'
+import { toast } from 'sonner'
+import { useNavigate } from '@tanstack/react-router'
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
-    const form = useForm({
-      defaultValues: {
-        email: '',
-        password: '',
-      },
-      validators: {
-        onSubmit: loginSchema,
-      },
-      onSubmit: async ({ value }) => {},
-    })
+  const navigate = useNavigate()
+  const form = useForm({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+    validators: {
+      onSubmit: loginSchema,
+    },
+    onSubmit: async ({ value }) => {
+      await authClient.signIn.email({
+        email: value.email,
+        password: value.password,
+        // callbackURL: '/dashboard',
+        fetchOptions: {
+          onSuccess: () => {
+            toast.success('Logged in successfully!')
+            navigate({ to: '/' })
+          },
+          onError: ({ error }) => {
+            toast.error(error.message)
+          },
+        },
+      })
+    },
+  })
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
+    <div
+      className={cn(
+        'flex flex-col gap-6 border border-dashed bg-background text-foreground p-4 sm:p-6 ',
+        className,
+      )}
+      {...props}
+    >
       <Card>
         <CardHeader>
           <CardTitle>Login to your account</CardTitle>
@@ -44,12 +69,12 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-           <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            form.handleSubmit()
-          }}
-        >
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              form.handleSubmit()
+            }}
+          >
             <FieldGroup>
               <form.Field
                 name="email"
