@@ -25,6 +25,12 @@ const config = defineConfig({
     tanstackStart(),
     viteReact(),
   ],
+  optimizeDeps: {
+    exclude: [
+      '@tanstack/start-server-core',
+      '@tanstack/react-router'
+    ],
+  },
 })
 
 export default config
