@@ -1,36 +1,37 @@
-"use client"
+'use client'
 
 import {
   SidebarGroup,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { NavPrimaryProps } from "@/lib/types"
-import { Link } from "@tanstack/react-router"
-
-
+} from '@/components/ui/sidebar'
+import { NavPrimaryProps } from '@/lib/types'
+import { Link } from '@tanstack/react-router'
 
 export function NavPrimary({ items }: NavPrimaryProps) {
-
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+    <SidebarGroup>
       <SidebarMenu>
         {items.map((item, index) => (
           <SidebarMenuItem key={index}>
-            <SidebarMenuButton asChild className="mt-1">
-              <Link activeProps={{
-                'data-active' : true,
-              }}
-              to={item.to} activeOptions={item.activeOptions}>
-                <item.icon />
-                <span>{item.title}</span>
+            <SidebarMenuButton asChild className="mt-1" tooltip={item.title}>
+              <Link
+                to={item.to}
+                activeOptions={item.activeOptions}
+                activeProps={{ 'data-active': true }}
+                className="flex items-center gap-3"
+              >
+                <item.icon className="size-4 shrink-0" />
+
+                {/* Hide text only when collapsed */}
+                <span className="group-data-[collapsible=icon]:hidden">
+                  {item.title}
+                </span>
               </Link>
             </SidebarMenuButton>
-          
           </SidebarMenuItem>
         ))}
-        
       </SidebarMenu>
     </SidebarGroup>
   )
