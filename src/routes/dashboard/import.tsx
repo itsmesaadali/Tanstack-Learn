@@ -1,6 +1,5 @@
 export const serverRuntime = 'node'
 
-
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -17,9 +16,15 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { Progress } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { bulkScrapeFn, mapUrlFn, scrapeUrlFn } from '@/data/items'
+import {
+  bulkScrapeFn,
+  BulkScrapeProgess,
+  mapUrlFn,
+  scrapeUrlFn,
+} from '@/data/items'
 import { bulkImportSchema, importSchema } from '@/schemas/import'
 import { type SearchResultWeb } from '@mendable/firecrawl-js'
 import { useForm } from '@tanstack/react-form'
@@ -35,6 +40,7 @@ export const Route = createFileRoute('/dashboard/import')({
 function RouteComponent() {
   const [isPending, startTransition] = useTransition()
   const [bulkIsPending, startBulkTransition] = useTransition()
+  const [progress, setProgress] = useState<BulkScrapeProgess | null>(null)
 
   // bulk import state
 
@@ -62,19 +68,42 @@ function RouteComponent() {
     setSelectedUrls(newSelectedUrls)
   }
 
- function handleImportSelected() {
+  function handleImportSelected() {
     startBulkTransition(async () => {
-
       if (selectedUrls.size === 0) {
         toast.error('Please select at least one URL to import.')
         return
       }
 
-      await bulkScrapeFn({
-        data: { urls: Array.from(selectedUrls) },
+      setProgress({
+        completed: 0,
+        total: selectedUrls.size,
+        url: '',
+        status: 'success',
       })
 
-      toast.success(`Imported ${selectedUrls.size} URLs successfully!`)
+      let successCount = 0
+      let failedCount = 0
+
+      for await (const update of await bulkScrapeFn({
+        data: { urls: Array.from(selectedUrls) },
+      })) {
+        setProgress(update)
+
+        if (update.status === 'success') {
+          successCount++
+        } else {
+          failedCount++
+        }
+      }
+
+      setProgress(null)
+      if (successCount > 0) {
+        toast.success(`Successfully imported ${successCount} items.`)
+      }
+      if (failedCount > 0) {
+        toast.error(`Failed to import ${failedCount} items.`)
+      }
     })
   }
 
@@ -275,11 +304,33 @@ function RouteComponent() {
                       }}
                     />
 
+                    {progress && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            Importing: {progress.completed} / {progress.total}
+                          </span>
+                          <span className="font-medium">
+                            {Math.round(
+                              (progress.completed / progress.total) * 100,
+                            )}
+                            %
+                          </span>
+                        </div>
+
+                        <Progress
+                          value={(progress.completed / progress.total) * 100}
+                        />
+                      </div>
+                    )}
+
                     <Button type="submit" disabled={isPending}>
                       {isPending ? (
                         <>
                           <Spinner />
-                          Processing...
+                          {progress
+                            ? ` Importing (${progress.completed}/${progress.total})`
+                            : 'Importing...'}
                         </>
                       ) : (
                         'Import URLs'
@@ -334,7 +385,12 @@ function RouteComponent() {
                       ))}
                     </div>
 
-                    <Button className="w-full" onClick={handleImportSelected} disabled={bulkIsPending} type='button'>
+                    <Button
+                      className="w-full"
+                      onClick={handleImportSelected}
+                      disabled={bulkIsPending}
+                      type="button"
+                    >
                       {bulkIsPending ? (
                         <>
                           <Spinner />

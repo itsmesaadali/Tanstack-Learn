@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -136,7 +136,7 @@ function ItemList({
             {item.ogImage && (
               <div className="aspect-video w-full overflow-hidden rounded-md bg-muted">
                 <img
-                  src={item.ogImage}
+                  src={item.ogImage ?? 'https://search.brave.com/images?q=gradient+background&context=W3sic3JjIjoiaHR0cHM6Ly9pbWFnZXMucGV4ZWxzLmNvbS9waG90b3MvNzEzMDU2OS9wZXhlbHMtcGhvdG8tNzEzMDU2OS5qcGVnP2F1dG89Y29tcHJlc3MmY3M9dGlueXNyZ2ImZHByPTEmdz01MDAiLCJ0ZXh0IjoiRnJlZSBWaWJyYW50IGdyYWRpZW50IGJhY2tncm91bmQgYmxlbmRpbmcgc29mdCBwYXN0ZWwgY29sb3JzIGZvciBjcmVhdGl2ZSBkZXNpZ24uIFN0b2NrIFBob3RvIiwicGFnZV91cmwiOiJodHRwczovL3d3dy5wZXhlbHMuY29tL3NlYXJjaC9ncmFkaWVudC8ifV0%3D&sig=48e299e89d04d15fabffd4218f3bafc3b902f7cc25c27077f8142f6d32e3483f&nonce=a1b6a2c7b745fdecce3433fb2c402a28&source=imageCluster'}
                   alt={item.title ?? 'Article Thumbnail'}
                   className="h-full w-full object-cover transition-transform group-hover:scale-105"
                 />
@@ -170,6 +170,22 @@ function ItemList({
               </CardTitle>
               {item.author && (
                 <p className="text-xs text-muted-foreground">{item.author}</p>
+              )}
+
+              {item.summary && (
+                <CardDescription className="line-clamp-2 text-sm text-muted-foreground">
+                  {item.summary}
+                </CardDescription>
+              )}
+
+              {item.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {item.tags.map((tag) => (
+                    <Badge key={tag} variant="secondary">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
               )}
             </CardHeader>
           </Link>

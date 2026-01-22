@@ -1,12 +1,13 @@
 import { prisma } from '@/db'
 import { firecrawl } from '@/lib/firecrawl'
 import { authFnMiddleware } from '@/middlewares/auth'
-import { bulkImportSchema, extractSchema, importSchema } from '@/schemas/import'
+import { bulkImportSchema, extractSchema, importSchema, searchSchema } from '@/schemas/import'
 import { createServerFn } from '@tanstack/react-start'
 import { notFound } from '@tanstack/react-router'
 import z from 'zod'
 import { generateText } from 'ai'
 import { openrouter } from '@/lib/openRouter'
+import { SearchResultWeb } from '@mendable/firecrawl-js'
 
 export const scrapeUrlFn = createServerFn({ method: 'POST' })
   .middleware([authFnMiddleware])
@@ -93,10 +94,18 @@ export const mapUrlFn = createServerFn({ method: 'POST' })
     return result.links
   })
 
+export type BulkScrapeProgess = {
+  total: number
+  completed: number
+  url:string
+  status: 'success' | 'failed' 
+}
+
 export const bulkScrapeFn = createServerFn({ method: 'POST' })
   .middleware([authFnMiddleware])
   .inputValidator(z.object({ urls: z.array(z.string().url()) }))
-  .handler(async ({ data, context }) => {
+  .handler(async function* ({ data, context })  {
+    const total = data.urls.length
     for (let i = 0; i < data.urls.length; i++) {
       const url = data.urls[i]
 
@@ -107,6 +116,8 @@ export const bulkScrapeFn = createServerFn({ method: 'POST' })
           status: 'PENDING',
         },
       })
+
+      let status: BulkScrapeProgess['status'] = 'success'
 
       try {
         const result = await firecrawl.scrape(url, {
@@ -153,6 +164,8 @@ export const bulkScrapeFn = createServerFn({ method: 'POST' })
         })
 
       } catch {
+
+        status = 'failed'
         await prisma.savedItem.update({
           where: {
             id: item.id,
@@ -163,6 +176,15 @@ export const bulkScrapeFn = createServerFn({ method: 'POST' })
         })
         
       }
+
+      const progress : BulkScrapeProgess = {
+        total,
+        completed: i + 1,
+        url,
+        status,
+      }
+
+      yield progress
     }
   })
 
@@ -244,3 +266,21 @@ export const bulkScrapeFn = createServerFn({ method: 'POST' })
 
     return item
   })
+
+ export const searchWebFn = createServerFn({ method: 'POST' })
+  .middleware([authFnMiddleware])
+  .inputValidator(searchSchema)
+  .handler(async ({ data }) => {
+    const result = await firecrawl.search(data.query, {
+      limit: 15,
+      location: 'USA',
+      tbs:'qdr:y',
+    })
+
+
+    return result.web?.map((item) => ({
+      url: (item  as SearchResultWeb).url,
+      title: (item as SearchResultWeb).title,
+      description: (item as SearchResultWeb).description,
+    })) as SearchResultWeb[];
+  }) 
