@@ -1,6 +1,3 @@
-export const runtime = 'nodejs'
-
-
 import { auth } from '@/lib/auth'
 import { createMiddleware } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
