@@ -30,10 +30,9 @@ const config = defineConfig({
   },
  nitro: {
     rollupConfig: {
-      external: ['pg'],
+      external: ['pg'], // Tell Rollup not to try and bundle pg
       output: {
-        // This ensures the commonjs 'pg' module is handled correctly
-        interop: 'auto', 
+        interop: 'auto', // Helps with CommonJS/ESM compatibility
       },
     },
   },
