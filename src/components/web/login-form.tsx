@@ -1,3 +1,8 @@
+import { Link, useNavigate  } from '@tanstack/react-router'
+import { useForm } from '@tanstack/react-form'
+import { toast } from 'sonner'
+import { useTransition } from 'react'
+import { Spinner } from '../ui/spinner'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,14 +20,9 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { Link } from '@tanstack/react-router'
-import { useForm } from '@tanstack/react-form'
 import { loginSchema } from '@/schemas/auth'
 import { authClient } from '@/lib/auth-client'
-import { toast } from 'sonner'
-import { useNavigate } from '@tanstack/react-router'
-import { useTransition } from 'react'
-import { Spinner } from '../ui/spinner'
+
 
 export function LoginForm({
   className,
@@ -39,7 +39,7 @@ export function LoginForm({
     validators: {
       onSubmit: loginSchema,
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       startTransition(async () => {
         await authClient.signIn.email({
           email: value.email,

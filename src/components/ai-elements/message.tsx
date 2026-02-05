@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  PaperclipIcon,
+  XIcon,
+} from "lucide-react";
+import { createContext, memo, useContext, useEffect, useState } from "react";
+import { Streamdown } from "streamdown";
+import type { FileUIPart, UIMessage } from "ai";
+import type { ComponentProps, HTMLAttributes, ReactElement } from "react";
 import { Button } from "@/components/ui/button";
 import {
   ButtonGroup,
@@ -12,16 +22,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { FileUIPart, UIMessage } from "ai";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  PaperclipIcon,
-  XIcon,
-} from "lucide-react";
-import type { ComponentProps, HTMLAttributes, ReactElement } from "react";
-import { createContext, memo, useContext, useEffect, useState } from "react";
-import { Streamdown } from "streamdown";
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
   from: UIMessage["role"];
@@ -111,8 +111,8 @@ type MessageBranchContextType = {
   totalBranches: number;
   goToPrevious: () => void;
   goToNext: () => void;
-  branches: ReactElement[];
-  setBranches: (branches: ReactElement[]) => void;
+  branches: Array<ReactElement>;
+  setBranches: (branches: Array<ReactElement>) => void;
 };
 
 const MessageBranchContext = createContext<MessageBranchContextType | null>(
@@ -143,7 +143,7 @@ export const MessageBranch = ({
   ...props
 }: MessageBranchProps) => {
   const [currentBranch, setCurrentBranch] = useState(defaultBranch);
-  const [branches, setBranches] = useState<ReactElement[]>([]);
+  const [branches, setBranches] = useState<Array<ReactElement>>([]);
 
   const handleBranchChange = (newBranch: number) => {
     setCurrentBranch(newBranch);
@@ -335,7 +335,7 @@ export function MessageAttachment({
 }: MessageAttachmentProps) {
   const filename = data.filename || "";
   const mediaType =
-    data.mediaType?.startsWith("image/") && data.url ? "image" : "file";
+    data.mediaType && data.mediaType.startsWith("image/") && data.url ? "image" : "file";
   const isImage = mediaType === "image";
   const attachmentLabel = filename || (isImage ? "Image" : "Attachment");
 

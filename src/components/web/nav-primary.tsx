@@ -1,13 +1,13 @@
 'use client'
 
+import { Link } from '@tanstack/react-router'
+import type { NavPrimaryProps } from '@/lib/types'
 import {
   SidebarGroup,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
-import { NavPrimaryProps } from '@/lib/types'
-import { Link } from '@tanstack/react-router'
 
 export function NavPrimary({ items }: NavPrimaryProps) {
   return (

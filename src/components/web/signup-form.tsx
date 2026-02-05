@@ -1,3 +1,8 @@
+import { Link, useNavigate } from '@tanstack/react-router'
+import { useForm } from '@tanstack/react-form'
+import { toast } from 'sonner'
+import { useTransition } from 'react'
+import { Spinner } from '../ui/spinner'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -14,13 +19,8 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { Link, useNavigate } from '@tanstack/react-router'
-import { useForm } from '@tanstack/react-form'
 import { signupSchema } from '@/schemas/auth'
 import { authClient } from '@/lib/auth-client'
-import { toast } from 'sonner'
-import { useTransition } from 'react'
-import { Spinner } from '../ui/spinner'
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const navigate = useNavigate()
@@ -35,7 +35,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     validators: {
       onSubmit: signupSchema,
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       startTransition(async () => {
         await authClient.signUp.email({
           name: value.fullName,

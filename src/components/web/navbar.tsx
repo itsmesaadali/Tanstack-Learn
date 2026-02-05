@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ThemeToggle } from "./theme-toggle";
 import { Button, buttonVariants } from "../ui/button";
+import { ThemeToggle } from "./theme-toggle";
 import { authClient } from "@/lib/auth-client";
 import { useSignout} from "@/lib/handle-signout";
 

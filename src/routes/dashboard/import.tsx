@@ -1,3 +1,11 @@
+import { useForm } from '@tanstack/react-form'
+import { createFileRoute } from '@tanstack/react-router'
+import { GlobeIcon, Link2Icon } from 'lucide-react'
+import { useState, useTransition } from 'react'
+import { toast } from 'sonner'
+import type {SearchResultWeb} from '@mendable/firecrawl-js';
+import type {
+  BulkScrapeProgess} from '@/data/items';
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -19,17 +27,10 @@ import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   bulkScrapeFn,
-  BulkScrapeProgess,
   mapUrlFn,
   scrapeUrlFn,
 } from '@/data/items'
 import { bulkImportSchema, importSchema } from '@/schemas/import'
-import { type SearchResultWeb } from '@mendable/firecrawl-js'
-import { useForm } from '@tanstack/react-form'
-import { createFileRoute } from '@tanstack/react-router'
-import { GlobeIcon, Link2Icon } from 'lucide-react'
-import { useState, useTransition } from 'react'
-import { toast } from 'sonner'
 
 export const Route = createFileRoute('/dashboard/import')({
   component: RouteComponent,
@@ -114,7 +115,7 @@ function RouteComponent() {
     validators: {
       onSubmit: importSchema,
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       startTransition(async () => {
         await scrapeUrlFn({
           data: value,
@@ -132,7 +133,7 @@ function RouteComponent() {
     validators: {
       onSubmit: bulkImportSchema,
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       startTransition(async () => {
         const data = await mapUrlFn({
           data: value,

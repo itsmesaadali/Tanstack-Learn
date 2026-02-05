@@ -2,6 +2,7 @@
 
 import { ChevronsUpDown, LogOut } from 'lucide-react'
 
+import type { NavUserProps } from '@/lib/types'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -18,7 +19,6 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { useSignout } from '@/lib/handle-signout'
-import { NavUserProps } from '@/lib/types'
 
 
 export function NavUser({ user } : NavUserProps) {
@@ -36,7 +36,7 @@ export function NavUser({ user } : NavUserProps) {
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.image || `https://api.dicebear.com/1.x/glass/svg?seed=${user.name}`} alt={user.name} />
-                <AvatarFallback>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                <AvatarFallback>{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -55,7 +55,7 @@ export function NavUser({ user } : NavUserProps) {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.image ?? `https://api.dicebear.com/1.x/glass/svg?seed=${user.name}`} alt={user.name} />
-                  <AvatarFallback>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarFallback>{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>

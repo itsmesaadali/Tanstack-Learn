@@ -1,3 +1,10 @@
+import { useForm } from '@tanstack/react-form'
+import { createFileRoute } from '@tanstack/react-router'
+import { Search, Sparkles } from 'lucide-react'
+import { useState, useTransition } from 'react'
+import { toast } from 'sonner'
+import type { SearchResultWeb } from '@mendable/firecrawl-js'
+import type { BulkScrapeProgess} from '@/data/items';
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -15,14 +22,8 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
-import { bulkScrapeFn, BulkScrapeProgess, searchWebFn } from '@/data/items'
+import { bulkScrapeFn, searchWebFn } from '@/data/items'
 import { searchSchema } from '@/schemas/import'
-import { SearchResultWeb } from '@mendable/firecrawl-js'
-import { useForm } from '@tanstack/react-form'
-import { createFileRoute } from '@tanstack/react-router'
-import { Search, Sparkles } from 'lucide-react'
-import { useState, useTransition } from 'react'
-import { toast } from 'sonner'
 import { Progress } from '@/components/ui/progress'
 
 export const Route = createFileRoute('/dashboard/discover')({
@@ -102,7 +103,7 @@ function RouteComponent() {
     validators: {
       onSubmit: searchSchema,
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       startTransition(async () => {
         const results = await searchWebFn({ data: { query: value.query } })
         setSearchResults(results)

@@ -1,9 +1,9 @@
 // src/routes/api/ai/summary.ts
+import { createFileRoute } from '@tanstack/react-router'
+import { streamText } from 'ai'
 import { prisma } from '@/db'
 import { auth } from '@/lib/auth'
 import { openrouter } from '@/lib/openRouter'
-import { createFileRoute } from '@tanstack/react-router'
-import { streamText } from 'ai'
 
 export const Route = createFileRoute('/api/ai/summary')({
   server: {

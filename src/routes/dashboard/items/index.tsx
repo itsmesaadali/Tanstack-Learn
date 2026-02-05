@@ -1,3 +1,8 @@
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Copy, Inbox } from 'lucide-react'
+import z from 'zod'
+import { zodValidator } from '@tanstack/zod-adapter'
+import { Suspense, use, useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,11 +17,6 @@ import {
 import { getItemsFn } from '@/data/items'
 import { ItemStatus } from '@/generated/prisma/enums'
 import { copyToClipboard } from '@/lib/clipboard'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { Copy, Inbox } from 'lucide-react'
-import z from 'zod'
-import { zodValidator } from '@tanstack/zod-adapter'
-import { Suspense, use, useEffect, useState } from 'react'
 import {
   Empty,
   EmptyContent,
@@ -82,8 +82,8 @@ function ItemList({
     const matchesStatus = status === 'all' || item.status === status
     const matchesQuery =
       query === '' ||
-      item.title?.toLowerCase().includes(query.toLowerCase()) ||
-      item.tags?.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
+      item.title.toLowerCase().includes(query.toLowerCase()) ||
+      item.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
 
     return matchesStatus && matchesQuery
   })
@@ -136,7 +136,7 @@ function ItemList({
             {item.ogImage && (
               <div className="aspect-video w-full overflow-hidden rounded-md bg-muted">
                 <img
-                  src={item.ogImage ?? 'https://search.brave.com/images?q=gradient+background&context=W3sic3JjIjoiaHR0cHM6Ly9pbWFnZXMucGV4ZWxzLmNvbS9waG90b3MvNzEzMDU2OS9wZXhlbHMtcGhvdG8tNzEzMDU2OS5qcGVnP2F1dG89Y29tcHJlc3MmY3M9dGlueXNyZ2ImZHByPTEmdz01MDAiLCJ0ZXh0IjoiRnJlZSBWaWJyYW50IGdyYWRpZW50IGJhY2tncm91bmQgYmxlbmRpbmcgc29mdCBwYXN0ZWwgY29sb3JzIGZvciBjcmVhdGl2ZSBkZXNpZ24uIFN0b2NrIFBob3RvIiwicGFnZV91cmwiOiJodHRwczovL3d3dy5wZXhlbHMuY29tL3NlYXJjaC9ncmFkaWVudC8ifV0%3D&sig=48e299e89d04d15fabffd4218f3bafc3b902f7cc25c27077f8142f6d32e3483f&nonce=a1b6a2c7b745fdecce3433fb2c402a28&source=imageCluster'}
+                  src={item.ogImage}
                   alt={item.title ?? 'Article Thumbnail'}
                   className="h-full w-full object-cover transition-transform group-hover:scale-105"
                 />
@@ -249,9 +249,9 @@ function RouteComponent() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
-            {Object.values(ItemStatus).map((status) => (
-              <SelectItem key={status} value={status}>
-                {status.charAt(0) + status.slice(1).toLowerCase()}
+            {Object.values(ItemStatus).map((itemStatus) => (
+              <SelectItem key={itemStatus} value={itemStatus}>
+                {itemStatus.charAt(0) + itemStatus.slice(1).toLowerCase()}
               </SelectItem>
             ))}
           </SelectContent>
