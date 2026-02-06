@@ -1,22 +1,24 @@
+"use client";
+
 import { toast } from "sonner";
-import { useNavigate } from "@tanstack/react-router";
+import { useRouter } from "next/navigation";
 import { authClient } from "./auth-client";
 
 export const useSignout = () => {
-  const navigate = useNavigate();
-  
+  const router = useRouter();
+
   const handleSignout = async () => {
     try {
       await authClient.signOut({
         fetchOptions: {
           onSuccess: () => {
-            navigate({ to: "/" });
             toast.success("Successfully logged out");
+            router.push("/");
           },
-          onError: ({ error }) => {
+          onError: ({ error }: { error: Error }) => {
             toast.error(error.message);
-          }
-        }
+          },
+        },
       });
     } catch (error) {
       toast.error("An error occurred during sign out");
