@@ -1,5 +1,7 @@
-import { Link, useNavigate  } from '@tanstack/react-router'
-import { useForm } from '@tanstack/react-form'
+"use client"
+
+import { Controller, useForm } from 'react-hook-form'
+import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from 'sonner'
 import { useTransition } from 'react'
 import { Spinner } from '../ui/spinner'
@@ -20,52 +22,52 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { loginSchema } from '@/schemas/auth'
 import { authClient } from '@/lib/auth-client'
+import { loginSchema } from '@/app/schemas/auth'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import z from 'zod'
 
 
 export function LoginForm({
-  className,
-  ...props
+
 }: React.ComponentProps<'div'>) {
-  const navigate = useNavigate()
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
-  const form = useForm({
+    const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
-      password: '',
-    },
-    validators: {
-      onSubmit: loginSchema,
-    },
-    onSubmit: ({ value }) => {
-      startTransition(async () => {
-        await authClient.signIn.email({
-          email: value.email,
-          password: value.password,
-          // callbackURL: '/dashboard',
-          fetchOptions: {
-            onSuccess: () => {
-              toast.success('Logged in successfully!')
-              navigate({ to: '/dashboard' })
-            },
-            onError: ({ error }) => {
-              toast.error(error.message)
-            },
-          },
-        })
-      })
+      email: "",
+      password: "",
     },
   })
+
+ function onSubmit(value: z.infer<typeof loginSchema>) {
+  startTransition(async () => {
+    await authClient.signIn.email({
+      email: value.email,
+      password: value.password,
+      fetchOptions: {
+        onSuccess: () => {
+          toast.success('Logged in successfully!')
+          router.push('/dashboard')
+        },
+        onError: ({ error }) => {
+          toast.error(error.message)
+        },
+      },
+    })
+  })
+}
+
 
   return (
     <div
       className={cn(
         'flex flex-col gap-6 border border-dashed bg-background text-foreground p-4 sm:p-6 ',
-        className,
       )}
-      {...props}
+  
     >
       <Card>
         <CardHeader>
@@ -76,69 +78,61 @@ export function LoginForm({
         </CardHeader>
         <CardContent>
           <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              form.handleSubmit()
-            }}
+          onSubmit={form.handleSubmit(onSubmit)}
           >
             <FieldGroup>
-              <form.Field
-                name="email"
-                children={(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        placeholder="john.doe@example.com"
-                        autoComplete="off"
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
 
-              <form.Field
-                name="password"
-                children={(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="password"
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        placeholder="********"
-                        autoComplete="off"
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
+              <Controller
+              name="email"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-demo-email">
+                    Email
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-rhf-demo-email"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="john.doe@example.com"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+               <Controller
+              name="password"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-demo-password">
+                    Password
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-rhf-demo-password"
+                    type="password"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="********"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
+      
               <Field>
                 <Button type="submit" disabled={isPending}>{isPending ? <><Spinner /> Logging in...</> : 'Login'}</Button>
 
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <Link to="/signup">Sign up</Link>
+                  Don&apos;t have an account? <Link href="/signup">Sign up</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

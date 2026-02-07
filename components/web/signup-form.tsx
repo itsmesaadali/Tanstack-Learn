@@ -1,5 +1,6 @@
-import { Link, useNavigate } from '@tanstack/react-router'
-import { useForm } from '@tanstack/react-form'
+'use client'
+
+import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { useTransition } from 'react'
 import { Spinner } from '../ui/spinner'
@@ -19,23 +20,27 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { signupSchema } from '@/schemas/auth'
+import { signupSchema } from '@/app/schemas/auth'
 import { authClient } from '@/lib/auth-client'
+import { useRouter } from 'next/navigation'
+import { zodResolver } from '@hookform/resolvers/zod'
+import z from 'zod'
+import Link from 'next/link'
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
-  const navigate = useNavigate()
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
-  const form = useForm({
+    const form = useForm<z.infer<typeof signupSchema>>({
+    resolver: zodResolver(signupSchema),
     defaultValues: {
-      fullName: '',
-      email: '',
-      password: '',
+      fullName: "",
+      email: "",
+      password: "",
     },
-    validators: {
-      onSubmit: signupSchema,
-    },
-    onSubmit: ({ value }) => {
+  })
+
+    function onSubmit(value: z.infer<typeof signupSchema>) {
       startTransition(async () => {
         await authClient.signUp.email({
           name: value.fullName,
@@ -44,7 +49,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
           fetchOptions: {
             onSuccess: () => {
               toast.success('Account created successfully!')
-              navigate({ to: '/dashboard' })
+              router.push('/dashboard')
             },
             onError: ({ error }) => {
               toast.error(error.message)
@@ -52,8 +57,8 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
           },
         })
       })
-    },
-  })
+    }
+
 
   return (
     <div className="flex flex-col gap-6 border border-dashed bg-background text-foreground p-4 sm:p-6">
@@ -66,90 +71,79 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         </CardHeader>
         <CardContent>
           <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              form.handleSubmit()
-            }}
+            onSubmit={ 
+              form.handleSubmit(onSubmit)
+            }
           >
             <FieldGroup>
-              <form.Field
-                name="fullName"
-                children={(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        placeholder="John Doe"
-                        autoComplete="off"
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
+                 <Controller
+              name="fullName"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-demo-fullName">
+                    Full Name
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-rhf-demo-fullName"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="John Doe"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
 
-              <form.Field
-                name="email"
-                children={(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        placeholder="john.doe@example.com"
-                        autoComplete="off"
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
+  
+              <Controller
+              name="email"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-demo-email">
+                    Email
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-rhf-demo-email"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="john.doe@example.com"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
 
-              <form.Field
-                name="password"
-                children={(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="password"
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        placeholder="********"
-                        autoComplete="off"
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
+               <Controller
+              name="password"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="form-rhf-demo-password">
+                    Password
+                  </FieldLabel>
+                  <Input
+                    {...field}
+                    id="form-rhf-demo-password"
+                    type="password"
+                    aria-invalid={fieldState.invalid}
+                    placeholder="********"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+
 
               <FieldGroup>
                 <Field>
@@ -157,7 +151,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                     {isPending ? <><Spinner /> Creating Account...</> : 'Create Account'}
                   </Button>
                   <FieldDescription className="px-6 text-center">
-                    Already have an account? <Link to="/login">Sign in</Link>
+                    Already have an account? <Link href="/login">Sign in</Link>
                   </FieldDescription>
                 </Field>
               </FieldGroup>
