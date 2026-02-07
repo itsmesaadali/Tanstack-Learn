@@ -23,7 +23,7 @@ export function Navbar() {
                 <div className="flex items-center gap-3">
                     {isPending ? null : session ? (
                         <>
-            <Link href="/dashboard" className={buttonVariants({variant: "outline"})}>Dashboard</Link>
+            <Link href="/dashboard/items" className={buttonVariants({variant: "outline"})}>Dashboard</Link>
                         <Button onClick={handleSignout}>Logout</Button>
                         </>
                     ) : (

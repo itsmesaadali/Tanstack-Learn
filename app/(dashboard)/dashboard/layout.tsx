@@ -6,14 +6,14 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { DashboardProviders } from '@/components/web/dashboard-providers'
-import { getSession } from '@/app/data/session'
+import { requireAuth } from '@/lib/session'
 
 export default async function DashboardLayout({
   children,
 }: {
   children: ReactNode
 }) {
-  const session = await getSession()
+  const session = await requireAuth()
   const user = session?.user
 
   return (

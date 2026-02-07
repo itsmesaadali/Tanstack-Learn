@@ -53,7 +53,7 @@ export function AppSidebar({ user }:NavUserProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size={'lg'} className=''>
-              <Link href="/dashboard" className="flex items-center gap-3">
+              <Link href="/dashboard/items" className="flex items-center gap-3">
                 <div className='bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-md'>
                   <BookmarkIcon  className='size-4' />
                 </div>
