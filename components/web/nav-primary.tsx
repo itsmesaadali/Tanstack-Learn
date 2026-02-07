@@ -1,6 +1,5 @@
 'use client'
 
-import { Link } from '@tanstack/react-router'
 import type { NavPrimaryProps } from '@/lib/types'
 import {
   SidebarGroup,
@@ -8,6 +7,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import Link from 'next/link'
 
 export function NavPrimary({ items }: NavPrimaryProps) {
   return (
@@ -17,9 +17,7 @@ export function NavPrimary({ items }: NavPrimaryProps) {
           <SidebarMenuItem key={index}>
             <SidebarMenuButton asChild className="mt-1" tooltip={item.title}>
               <Link
-                to={item.to}
-                activeOptions={item.activeOptions}
-                activeProps={{ 'data-active': true }}
+                href={item.to}
                 className="flex items-center gap-3"
               >
                 <item.icon className="size-4 shrink-0" />
