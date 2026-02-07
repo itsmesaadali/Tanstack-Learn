@@ -1,13 +1,13 @@
 import { createServerFn } from '@tanstack/react-start'
-import { notFound } from '@tanstack/react-router'
 import z from 'zod'
 import { generateText } from 'ai'
 import type { SearchResultWeb } from '@mendable/firecrawl-js'
-import { prisma } from '@/db'
 import { firecrawl } from '@/lib/firecrawl'
 import { authFnMiddleware } from '@/middlewares/auth'
-import { bulkImportSchema, extractSchema, importSchema, searchSchema } from '@/schemas/import'
+import { bulkImportSchema, extractSchema, importSchema, searchSchema } from '@/app/schemas/import'
 import { openrouter } from '@/lib/openRouter'
+import { notFound } from 'next/navigation'
+import { prisma } from '@/lib/prisma'
 
 export const scrapeUrlFn = createServerFn({ method: 'POST' })
   .middleware([authFnMiddleware])
