@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button, buttonVariants } from "../ui/button";
-import { ThemeToggle } from "./theme-toggle";
+import { ModeToggle} from "./theme-toggle";
 import { authClient } from "@/lib/auth-client";
 import { useSignout} from "@/lib/handle-signout";
 
@@ -32,7 +32,7 @@ export function Navbar() {
                             <Link href="/signup" className={buttonVariants({variant: "default"})}>Get Started</Link>
                         </>
                     )}
-                    <ThemeToggle />
+                    <ModeToggle />
                 </div>
             </div>
         </nav>
