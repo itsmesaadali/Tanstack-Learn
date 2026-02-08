@@ -1,115 +1,119 @@
-import { useForm } from '@tanstack/react-form'
-import { createFileRoute } from '@tanstack/react-router'
-import { Search, Sparkles } from 'lucide-react'
-import { useState, useTransition } from 'react'
-import { toast } from 'sonner'
-import type { SearchResultWeb } from '@mendable/firecrawl-js'
-import type { BulkScrapeProgess} from '@/data/items';
-import { Button } from '@/components/ui/button'
+"use client";
+
+import { Controller, useForm } from "react-hook-form";
+import { Search, Sparkles } from "lucide-react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import type { SearchResultWeb } from "@mendable/firecrawl-js";
+import {
+  startBulkScrapeAction,
+  type BulkScrapeProgess,
+} from "@/app/actions/bulk-scrape";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from "@/components/ui/card";
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from '@/components/ui/field'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
-import { Spinner } from '@/components/ui/spinner'
-import { bulkScrapeFn, searchWebFn } from '@/data/items'
-import { searchSchema } from '@/schemas/import'
-import { Progress } from '@/components/ui/progress'
+} from "@/components/ui/field";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 
-export const Route = createFileRoute('/dashboard/discover')({
-  component: RouteComponent,
-})
+import { searchSchema } from "@/app/schemas/import";
+import { Progress } from "@/components/ui/progress";
+import { searchWebAction } from "@/app/actions/search-web";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-function RouteComponent() {
-  const [isPending, startTransition] = useTransition()
-  const [bulkIsPending, startBulkTransition] = useTransition()
+export default function DiscoverPage() {
+  const [isPending, startTransition] = useTransition();
+  const [bulkIsPending, startBulkTransition] = useTransition();
 
-  const [searchResults, setSearchResults] = useState<Array<SearchResultWeb>>([])
-  const [selectedUrls, setSelectedUrls] = useState<Set<string>>(new Set())
+  const [searchResults, setSearchResults] = useState<Array<SearchResultWeb>>(
+    [],
+  );
+  const [selectedUrls, setSelectedUrls] = useState<Set<string>>(new Set());
 
-  const [progress, setProgress] = useState<BulkScrapeProgess | null>(null)
+  const [progress, setProgress] = useState<BulkScrapeProgess | null>(null);
 
   function handleSelectAll() {
     if (selectedUrls.size === searchResults.length) {
-      setSelectedUrls(new Set())
+      setSelectedUrls(new Set());
     } else {
-      setSelectedUrls(new Set(searchResults.map((link) => link.url)))
+      setSelectedUrls(new Set(searchResults.map((link) => link.url)));
     }
   }
 
   function handleToggleUrl(url: string) {
-    const newSelectedUrls = new Set(selectedUrls)
+    const newSelectedUrls = new Set(selectedUrls);
     if (newSelectedUrls.has(url)) {
-      newSelectedUrls.delete(url)
+      newSelectedUrls.delete(url);
     } else {
-      newSelectedUrls.add(url)
+      newSelectedUrls.add(url);
     }
-    setSelectedUrls(newSelectedUrls)
+    setSelectedUrls(newSelectedUrls);
   }
 
   function handleImportSelected() {
     startBulkTransition(async () => {
       if (selectedUrls.size === 0) {
-        toast.error('Please select at least one URL to import.')
-        return
+        toast.error("Please select at least one URL to import.");
+        return;
       }
 
       setProgress({
         completed: 0,
         total: selectedUrls.size,
-        url: '',
-        status: 'success',
-      })
+        url: "",
+        status: "success",
+      });
 
-      let successCount = 0
-      let failedCount = 0
+      let successCount = 0;
+      let failedCount = 0;
 
-      for await (const update of await bulkScrapeFn({
-        data: { urls: Array.from(selectedUrls) },
+      for await (const update of startBulkScrapeAction({
+        urls: Array.from(selectedUrls),
       })) {
-        setProgress(update)
+        setProgress(update);
 
-        if (update.status === 'success') {
-          successCount++
+        if (update.status === "success") {
+          successCount++;
         } else {
-          failedCount++
+          failedCount++;
         }
       }
 
-      setProgress(null)
+      setProgress(null);
       if (successCount > 0) {
-        toast.success(`Successfully imported ${successCount} items.`)
+        toast.success(`Successfully imported ${successCount} items.`);
       }
       if (failedCount > 0) {
-        toast.error(`Failed to import ${failedCount} items.`)
+        toast.error(`Failed to import ${failedCount} items.`);
       }
-    })
+    });
   }
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof searchSchema>>({
+    resolver: zodResolver(searchSchema),
     defaultValues: {
-      query: '',
+      query: "",
     },
-    validators: {
-      onSubmit: searchSchema,
-    },
-    onSubmit: ({ value }) => {
-      startTransition(async () => {
-        const results = await searchWebFn({ data: { query: value.query } })
-        setSearchResults(results)
-      })
-    },
-  })
+  });
+
+  function onSubmit(data: z.infer<typeof searchSchema>) {
+    startTransition(async () => {
+      const results = await searchWebAction({ data: { query: data.query } });
+      setSearchResults(results ?? []);
+    });
+  }
 
   return (
     <div className="flex flex-1 items-center justify-center py-8">
@@ -131,39 +135,28 @@ function RouteComponent() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                form.handleSubmit()
-              }}
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+              <Controller
+                name="query"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="form-rhf-demo-query">Query</FieldLabel>
+                    <Input
+                      {...field}
+                      id="form-rhf-demo-query"
+                      onChange={(e) => field.onChange(e.target.value)}
+                      aria-invalid={fieldState.invalid}
+                      placeholder="Enter your search query"
+                      autoComplete="off"
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
               <FieldGroup>
-                <form.Field
-                  name="query"
-                  children={(field) => {
-                    const isInvalid =
-                      field.state.meta.isTouched && !field.state.meta.isValid
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>Query</FieldLabel>
-                        <Input
-                          id={field.name}
-                          name={field.name}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          aria-invalid={isInvalid}
-                          placeholder="Enter your search query"
-                          autoComplete="off"
-                        />
-                        {isInvalid && (
-                          <FieldError errors={field.state.meta.errors} />
-                        )}
-                      </Field>
-                    )
-                  }}
-                />
-
                 <Button type="submit" disabled={isPending}>
                   {isPending ? (
                     <>
@@ -185,13 +178,13 @@ function RouteComponent() {
                     Found {searchResults.length} links
                   </p>
                   <Button
-                    variant={'outline'}
-                    size={'sm'}
+                    variant={"outline"}
+                    size={"sm"}
                     onClick={handleSelectAll}
                   >
                     {selectedUrls.size === searchResults.length
-                      ? 'Deselect All'
-                      : 'Select All'}
+                      ? "Deselect All"
+                      : "Select All"}
                   </Button>
                 </div>
                 {/* {hide the scrollbar} */}
@@ -208,10 +201,10 @@ function RouteComponent() {
                       />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium">
-                          {link.title ?? 'Title has not been found'}
+                          {link.title ?? "Title has not been found"}
                         </p>
                         <p className="truncate text-muted-foreground text-xs">
-                          {link.description ?? 'Description has not been found'}
+                          {link.description ?? "Description has not been found"}
                         </p>
                         <p className="truncate text-muted-foreground text-xs">
                           {link.url}
@@ -252,7 +245,7 @@ function RouteComponent() {
                       <Spinner />
                       {progress
                         ? ` Importing (${progress.completed}/${progress.total})`
-                        : 'Importing...'}
+                        : "Importing..."}
                     </>
                   ) : (
                     `Import ${selectedUrls.size} Selected URLs`
@@ -264,5 +257,5 @@ function RouteComponent() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
