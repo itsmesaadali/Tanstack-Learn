@@ -23,9 +23,10 @@ export async function scrapeUrlAction(input: z.infer<typeof importSchema>) {
       formats: [
         "markdown",
         {
-          type: "json", schema: extractSchema,
+          type: "json", 
+          // schema: extractSchema,
 
-          // prompt: 'Please extract the following fields from the webpage: publishedAt (the date the content was published at timestamp), author (the name of the author)',
+          prompt: 'Please extract the following fields from the webpage: publishedAt (the date the content was published at timestamp), author (the name of the author)',
         },
       ],
       location: { country: "US", languages: ["en"] },

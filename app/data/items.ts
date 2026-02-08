@@ -208,7 +208,7 @@ export const bulkScrapeFn = createServerFn({ method: 'POST' })
   .middleware([authFnMiddleware])
   .inputValidator(z.object({ id: z.string()}))
   .handler(async ({ data, context }) => {
-    const item = await prisma.savedItem.findUnique({
+    const item = await prisma.savedItem.findFirst({
       where: {
         userId: context.session.user.id,
         id: data.id,
@@ -228,7 +228,7 @@ export const bulkScrapeFn = createServerFn({ method: 'POST' })
     summary: z.string(),
   }))
   .handler(async ({ data, context }) => {
-    const existing = await prisma.savedItem.findUnique({
+    const existing = await prisma.savedItem.findFirst({
       where: {
         userId: context.session.user.id,
         id: data.id,

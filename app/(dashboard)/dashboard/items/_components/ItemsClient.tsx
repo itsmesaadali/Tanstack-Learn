@@ -1,176 +1,122 @@
-'use client'
+"use client";
 
-import { Copy, Inbox } from 'lucide-react'
-import { useEffect, useState, use } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
+import { Copy, Inbox } from "lucide-react";
+import Link from "next/link";
 
-import { Badge } from '@/components/ui/badge'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
-import { ItemStatus } from '@/lib/generated/prisma/enums'
-import { copyToClipboard } from '@/lib/clipboard'
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/components/ui/empty'
-import z from 'zod'
-
-const itemsSearchParamsSchema = z.object({
-  query: z.string().default(''),
-  status: z.union([z.literal('all'), z.nativeEnum(ItemStatus)]).default('all'),
-})
-
+import { copyToClipboard } from "@/lib/clipboard";
+import Image from "next/image";
 
 type Props = {
-  itemsPromise: ReturnType<any>
-  searchParams: {
-    query?: string
-    status?: string
-  }
-}
+  items: any[];
+};
 
-export default function ItemsClient({ itemsPromise, searchParams }: Props) {
-  const router = useRouter()
-  const items = use(itemsPromise) as Array<{
-    id: string
-    title: string
-    status: ItemStatus
-    summary?: string
-    tags: string[]
-    url: string
-  }>
-
-    // const items = use(itemsPromise)
-
-
-  const query = searchParams.query ?? ''
-  const status = (searchParams.status ?? 'all') as 'all' | ItemStatus
-
-  const [searchInput, setSearchInput] = useState(query)
-
-  useEffect(() => {
-    if (searchInput === query) return
-
-    const t = setTimeout(() => {
-      const params = new URLSearchParams(searchParams as any)
-      params.set('query', searchInput)
-      router.push(`?${params.toString()}`)
-    }, 300)
-
-    return () => clearTimeout(t)
-  }, [searchInput])
-
-  const filteredItems = items.filter((item: any) => {
-    const matchesStatus = status === 'all' || item.status === status
-    const matchesQuery =
-      !query ||
-      item.title?.toLowerCase().includes(query.toLowerCase()) ||
-      item.tags.some((tag: string) =>
-        tag.toLowerCase().includes(query.toLowerCase()),
-      )
-
-    return matchesStatus && matchesQuery
-  })
-
-  if (filteredItems.length === 0) {
+export default function ItemsClient({ items }: Props) {
+  if (!items || items.length === 0) {
     return (
-      <Empty className="border rounded-lg h-full">
-        <EmptyHeader>
-          <EmptyMedia>
-            <Inbox className="size-16 text-muted-foreground" />
-          </EmptyMedia>
-          <EmptyTitle>No saved items</EmptyTitle>
-          <EmptyDescription>
-            Try adjusting filters or import new items.
-          </EmptyDescription>
-        </EmptyHeader>
+      <div className="border rounded-lg p-10 text-center">
+        <Inbox className="mx-auto size-14 text-muted-foreground" />
+        <h2 className="mt-4 text-lg font-semibold">No saved items</h2>
+        <p className="text-muted-foreground">
+          Import links to see them here.
+        </p>
 
-        <EmptyContent>
-          <Link
-            href="/dashboard/import"
-            className={buttonVariants({ variant: 'outline' })}
-          >
-            Import Items
-          </Link>
-        </EmptyContent>
-      </Empty>
-    )
+        <Link
+          href="/dashboard/import"
+          className="mt-4 inline-flex items-center justify-center rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"
+        >
+          Import Items
+        </Link>
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex gap-4">
-        <Input
-          placeholder="Search by title or tags"
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-        />
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {items.map((item) => {
+        const imageUrl =
+          item.ogImage ??
+          `https://openplaceholder.com/600x400/${encodeURIComponent(
+            item.title ?? "Saved Item"
+          )}`;
 
-        <Select
-          value={status}
-          onValueChange={(value) => {
-            const params = new URLSearchParams(searchParams as any)
-            params.set('status', value)
-            router.push(`?${params.toString()}`)
-          }}
-        >
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            {Object.values(ItemStatus).map((s) => (
-              <SelectItem key={s} value={s}>
-                {s.toLowerCase()}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        return (
+          <Card
+            key={item.id}
+            className="group overflow-hidden transition-shadow hover:shadow-lg"
+          >
+            <Link href={`/dashboard/items/${item.id}`}>
+              {/* Image */}
+              <div className="relative h-44 w-full overflow-hidden bg-muted">
+                <Image
+                  src={imageUrl}
+                  alt={item.title ?? "Saved item"}
+                  fill
+                  unoptimized
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  placeholder="blur"
+                  blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjZWVlZWVlIi8+PC9zdmc+"
+                />
+              </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredItems.map((item: any) => (
-          <Card key={item.id} className="group overflow-hidden pt-0">
-            <Link href={`/dashboard/items/${item.id}`} className="block p-4">
+              {/* Content */}
               <CardHeader className="space-y-3">
-                <div className="flex justify-between">
-                  <Badge>{item.status.toLowerCase()}</Badge>
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`rounded-full border px-2 py-0.5 text-xs font-medium ${statusVariant(
+                      item.status
+                    )}`}
+                  >
+                    {item.status.toLowerCase()}
+                  </span>
+
                   <Button
                     size="icon"
-                    variant="outline"
+                    variant="ghost"
                     onClick={(e) => {
-                      e.preventDefault()
-                      copyToClipboard(item.url)
+                      e.preventDefault();
+                      copyToClipboard(item.url);
                     }}
                   >
                     <Copy className="size-4" />
                   </Button>
                 </div>
 
-                <CardTitle>{item.title}</CardTitle>
+                <CardTitle className="line-clamp-2 text-base">
+                  {item.title ?? "Untitled"}
+                </CardTitle>
 
                 {item.summary && (
-                  <CardDescription>{item.summary}</CardDescription>
+                  <CardDescription className="line-clamp-3 text-sm">
+                    {item.summary}
+                  </CardDescription>
                 )}
               </CardHeader>
             </Link>
           </Card>
-        ))}
-      </div>
+        );
+      })}
     </div>
-  )
+  );
+}
+
+function statusVariant(status: string) {
+  switch (status) {
+    case "COMPLETED":
+      return "bg-green-100 text-green-700 border-green-200";
+    case "FAILED":
+      return "bg-red-100 text-red-700 border-red-200";
+    case "PROCESSING":
+      return "bg-yellow-100 text-yellow-700 border-yellow-200";
+    case "PENDING":
+    default:
+      return "bg-gray-100 text-gray-700 border-gray-200";
+  }
 }

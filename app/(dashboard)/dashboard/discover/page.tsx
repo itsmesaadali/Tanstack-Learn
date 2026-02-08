@@ -79,16 +79,14 @@ export default function DiscoverPage() {
       let successCount = 0;
       let failedCount = 0;
 
-      for await (const update of startBulkScrapeAction({
+      const result = await startBulkScrapeAction({
         urls: Array.from(selectedUrls),
-      })) {
-        setProgress(update);
+      });
 
-        if (update.status === "success") {
-          successCount++;
-        } else {
-          failedCount++;
-        }
+        if (result && result.success) {
+        successCount = selectedUrls.size;
+      } else {
+        failedCount = selectedUrls.size;
       }
 
       setProgress(null);

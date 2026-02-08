@@ -1,20 +1,19 @@
-"use server"
+'use server'
 
-import { prisma } from "@/lib/prisma"
-import { requireAuth } from "@/lib/session"
-import { notFound } from "next/navigation"
+import { prisma } from '@/lib/prisma'
+import { requireAuth } from '@/lib/session'
 
 export async function getItemByIdAction(id: string) {
-    const session = await requireAuth()
+  const session = await requireAuth()
 
-    const item = await prisma.savedItem.findUnique({
-        where: {
-            id,
-            userId: session.user.id,
-        },
-    })
+  if (!id) return null
 
-    if (!item) notFound()
-        
-    return item
+  const item = await prisma.savedItem.findFirst({
+    where: {
+      id,
+      userId: session.user.id,
+    },
+  })
+
+  return item
 }

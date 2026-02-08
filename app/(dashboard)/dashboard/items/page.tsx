@@ -1,31 +1,21 @@
-// app/dashboard/items/page.tsx
-import { Suspense } from 'react'
 import { getItemsAction } from '@/app/actions/get-items'
+import { Suspense } from 'react'
 import { ItemListSkeleton } from './_components/itemsSkeleton'
 import ItemsClient from './_components/ItemsClient'
 
 export const metadata = {
   title: 'Saved Items',
-  openGraph: {
-    title: 'Saved Items',
-  },
 }
 
 export default async function ItemsPage({
-  searchParams,
-}: {
-  searchParams: {
-    query?: string
-    status?: string
-  }
+
 }) {
-  const itemsPromise = getItemsAction()
+  const items = await getItemsAction()
 
   return (
     <Suspense fallback={<ItemListSkeleton />}>
       <ItemsClient
-        itemsPromise={itemsPromise}
-        searchParams={searchParams}
+        items={items}
       />
     </Suspense>
   )

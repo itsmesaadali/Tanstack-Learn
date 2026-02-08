@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma"
 import { firecrawl } from "@/lib/firecrawl"
 import { requireAuth } from "@/lib/session"
-import z from "zod"
+import z, { success } from "zod"
 import { extractSchema } from "@/app/schemas/import"
 
 const schema = z.object({
@@ -18,7 +18,7 @@ export type BulkScrapeProgess = {
   status: 'success' | 'failed'
 }
 
-export async function* startBulkScrapeAction(input: z.infer<typeof schema>) {
+export async function startBulkScrapeAction(input: z.infer<typeof schema>) {
   const { urls } = schema.parse(input)
   const session = await requireAuth()
 
@@ -101,7 +101,7 @@ export async function* startBulkScrapeAction(input: z.infer<typeof schema>) {
       status,
     }
 
-    yield progress
+    return { success:true}
 
   }
 }
