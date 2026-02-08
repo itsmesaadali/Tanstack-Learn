@@ -22,7 +22,11 @@ export async function scrapeUrlAction(input: z.infer<typeof importSchema>) {
     const result = await firecrawl.scrape(data.url, {
       formats: [
         "markdown",
-        { type: "json", schema: extractSchema },
+        {
+          type: "json", schema: extractSchema,
+
+          // prompt: 'Please extract the following fields from the webpage: publishedAt (the date the content was published at timestamp), author (the name of the author)',
+        },
       ],
       location: { country: "US", languages: ["en"] },
       onlyMainContent: true,
@@ -31,12 +35,18 @@ export async function scrapeUrlAction(input: z.infer<typeof importSchema>) {
 
     const jsonData = result.json as z.infer<typeof extractSchema>
 
-    const publishedAt =
-      jsonData.publishedAt && !isNaN(new Date(jsonData.publishedAt).getTime())
-        ? new Date(jsonData.publishedAt)
-        : null
 
-    return await prisma.savedItem.update({
+    let publishedAt = null
+
+    if (jsonData.publishedAt) {
+      const date = new Date(jsonData.publishedAt)
+
+      if (!isNaN(date.getTime())) {
+        publishedAt = date
+      }
+    }
+
+    const updatedItem = await prisma.savedItem.update({
       where: { id: item.id },
       data: {
         title: result.metadata?.title ?? null,
@@ -47,10 +57,14 @@ export async function scrapeUrlAction(input: z.infer<typeof importSchema>) {
         status: "COMPLETED",
       },
     })
+
+    return updatedItem
   } catch {
-    return prisma.savedItem.update({
+    const failedItem = prisma.savedItem.update({
       where: { id: item.id },
       data: { status: "FAILED" },
     })
+
+    return failedItem
   }
 }

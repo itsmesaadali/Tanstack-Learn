@@ -51,7 +51,7 @@ export function LoginForm({
       fetchOptions: {
         onSuccess: () => {
           toast.success('Logged in successfully!')
-          router.push('/dashboard')
+          router.push('/dashboard/items')
         },
         onError: ({ error }) => {
           toast.error(error.message)

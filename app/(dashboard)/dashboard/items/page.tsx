@@ -1,8 +1,8 @@
 // app/dashboard/items/page.tsx
 import { Suspense } from 'react'
 import { getItemsAction } from '@/app/actions/get-items'
-import { ItemListSkeleton } from './itemsSkeleton'
-import ItemsClient from './ItemsClient'
+import { ItemListSkeleton } from './_components/itemsSkeleton'
+import ItemsClient from './_components/ItemsClient'
 
 export const metadata = {
   title: 'Saved Items',

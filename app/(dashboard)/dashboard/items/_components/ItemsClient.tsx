@@ -34,7 +34,6 @@ const itemsSearchParamsSchema = z.object({
   status: z.union([z.literal('all'), z.nativeEnum(ItemStatus)]).default('all'),
 })
 
-type ItemsSearchParams = z.infer<typeof itemsSearchParamsSchema>
 
 type Props = {
   itemsPromise: ReturnType<any>

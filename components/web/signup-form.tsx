@@ -49,7 +49,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
           fetchOptions: {
             onSuccess: () => {
               toast.success('Account created successfully!')
-              router.push('/dashboard')
+              router.push('/dashboard/items')
             },
             onError: ({ error }) => {
               toast.error(error.message)
