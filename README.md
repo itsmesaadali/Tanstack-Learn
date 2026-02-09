@@ -1,36 +1,151 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Web Scraper & Discover
 
-## Getting Started
+A modern AI‑powered web scraping and discovery platform built with **Next.js App Router**, **OpenRouter**, **AI SDK**, **Firecrawl**, and **shadcn/ui**.
 
-First, run the development server:
+Paste a single link or bulk‑scrape many URLs, let AI summarize and tag the content, then explore everything in a clean discovery interface.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## ✨ Features
+
+* 🔗 **Single URL scraping** – scrape and summarize any webpage
+* 📦 **Bulk scraping** – process multiple links at once
+* 🤖 **AI summaries** – concise, readable summaries generated via OpenRouter
+* 🏷️ **Automatic tags** – AI‑generated tags for fast discovery
+* 🔍 **Search & discover** – explore saved items by topic
+* 🔐 **Authenticated actions** – secure server actions with session checks
+* ⚡ **Streaming AI responses** – fast, real‑time summaries
+
+---
+
+## 🧱 Tech Stack
+
+* **Framework**: Next.js 16 (App Router)
+* **UI**: shadcn/ui + Tailwind CSS
+* **AI**: ai-sdk + OpenRouter
+* **Scraping**: Firecrawl
+* **Database**: Prisma
+* **Validation**: Zod
+* **Auth**: Session‑based (App Router compatible)
+
+---
+
+## 📂 Project Structure
+
+```txt
+app/
+├─ api/
+│  └─ ai/summary/route.ts      # Streaming AI summary endpoint
+├─ actions/
+│  ├─ save-summary.ts          # Save summary + generate tags
+│  └─ search-web.ts            # Firecrawl web search
+├─ schemas/
+│  └─ import.ts                # Zod schemas
+├─ page.tsx                    # Landing page
+└─ dashboard/
+   └─ items/                   # Scraped & discovered items
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Getting Started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1️⃣ Install dependencies
 
-## Learn More
+```bash
+pnpm install
+# or
+npm install
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 2️⃣ Environment variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Create a `.env.local` file:
 
-## Deploy on Vercel
+```env
+OPENROUTER_API_KEY=your_key_here
+FIRECRAWL_API_KEY=your_key_here
+DATABASE_URL=your_database_url
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 3️⃣ Run the app
+
+```bash
+pnpm dev
+```
+
+App will be available at:
+
+```
+http://localhost:3000
+```
+
+---
+
+## 🤖 AI Summary Flow
+
+```txt
+Client (useCompletion)
+        ↓
+/api/ai/summary (streamText)
+        ↓
+Streaming summary
+        ↓
+Server Action (save + tags)
+        ↓
+Database
+```
+
+* AI routes are **stateless**
+* Persistence happens via **Server Actions**
+* Streaming is handled with `useCompletion`
+
+---
+
+## 🔍 Web Search (Firecrawl)
+
+### Server Action
+
+```ts
+searchWebAction({ query: "AI scraping tools" })
+```
+
+* Validated using Zod
+* Auth‑protected
+* Returns normalized search results
+
+---
+
+
+## 🧠 Design Principles
+
+* AI routes handle **only AI logic**
+* Server Actions handle **DB + auth**
+* Client components stay thin
+* Free AI models are treated as unreliable (fallbacks included)
+
+---
+
+## 🛣️ Roadmap
+
+* [ ] Chunked long‑content summarization
+* [ ] Retry & regenerate summaries
+* [ ] Semantic search
+* [ ] Collections & folders
+* [ ] Public discovery feed
+
+---
+
+## 📜 License
+
+MIT
+
+---
+
+## 🙌 Credits
+
+Built with ❤️ using Next.js, OpenRouter, ai-sdk, Firecrawl, and shadcn/ui.
